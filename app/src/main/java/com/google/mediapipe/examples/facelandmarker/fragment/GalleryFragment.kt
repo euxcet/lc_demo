@@ -299,20 +299,20 @@ class GalleryFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
 
                     faceLandmarkerHelper.detectImage(bitmap)?.let { result ->
                         activity?.runOnUiThread {
-                            if (fragmentGalleryBinding.recyclerviewResults.scrollState != ViewPager2.SCROLL_STATE_DRAGGING) {
-                                faceBlendshapesResultAdapter.updateResults(result.result)
-                                faceBlendshapesResultAdapter.notifyDataSetChanged()
-                            }
-                            fragmentGalleryBinding.overlay.setResults(
-                                result.result,
-                                bitmap.height,
-                                bitmap.width,
-                                RunningMode.IMAGE
-                            )
+//                            if (fragmentGalleryBinding.recyclerviewResults.scrollState != ViewPager2.SCROLL_STATE_DRAGGING) {
+//                                faceBlendshapesResultAdapter.updateResults(result.result)
+//                                faceBlendshapesResultAdapter.notifyDataSetChanged()
+//                            }
+//                            fragmentGalleryBinding.overlay.setResults(
+//                                result.result,
+//                                bitmap.height,
+//                                bitmap.width,
+//                                RunningMode.IMAGE
+//                            )
 
-                            setUiEnabled(true)
-                            fragmentGalleryBinding.bottomSheetLayout.inferenceTimeVal.text =
-                                String.format("%d ms", result.inferenceTime)
+//                            setUiEnabled(true)
+//                            fragmentGalleryBinding.bottomSheetLayout.inferenceTimeVal.text =
+//                                String.format("%d ms", result.inferenceTime)
                         }
                     } ?: run { Log.e(TAG, "Error running face landmarker.") }
 
@@ -382,12 +382,12 @@ class GalleryFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
                         // The video playback has finished so we stop drawing bounding boxes
                         backgroundExecutor.shutdown()
                     } else {
-                        fragmentGalleryBinding.overlay.setResults(
-                            result.results[resultIndex],
-                            result.inputImageHeight,
-                            result.inputImageWidth,
-                            RunningMode.VIDEO
-                        )
+//                        fragmentGalleryBinding.overlay.setResults(
+//                            result.results[resultIndex],
+//                            result.inputImageHeight,
+//                            result.inputImageWidth,
+//                            RunningMode.VIDEO
+//                        )
 
                         if (fragmentGalleryBinding.recyclerviewResults.scrollState != ViewPager2.SCROLL_STATE_DRAGGING) {
                             faceBlendshapesResultAdapter.updateResults(result.results[resultIndex])
@@ -396,8 +396,8 @@ class GalleryFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
 
                         setUiEnabled(true)
 
-                        fragmentGalleryBinding.bottomSheetLayout.inferenceTimeVal.text =
-                            String.format("%d ms", result.inferenceTime)
+//                        fragmentGalleryBinding.bottomSheetLayout.inferenceTimeVal.text =
+//                            String.format("%d ms", result.inferenceTime)
                     }
                 }
             },

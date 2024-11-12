@@ -96,4 +96,6 @@ dependencies {
 
     // MediaPipe Library
     implementation 'com.google.mediapipe:tasks-vision:0.10.14'
+
+    implementation "org.apache.commons:commons-math3:3.6.1"
 }

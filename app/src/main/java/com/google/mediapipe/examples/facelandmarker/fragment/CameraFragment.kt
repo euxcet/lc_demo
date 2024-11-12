@@ -35,23 +35,24 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_DRAGGING
-import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE
-import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_SETTLING
-import androidx.viewpager2.widget.ViewPager2.ScrollState
 import com.google.mediapipe.examples.facelandmarker.FaceLandmarkerHelper
 import com.google.mediapipe.examples.facelandmarker.MainViewModel
 import com.google.mediapipe.examples.facelandmarker.R
 import com.google.mediapipe.examples.facelandmarker.databinding.FragmentCameraBinding
+import com.google.mediapipe.examples.facelandmarker.network.ActivateClient
+import com.google.mediapipe.examples.facelandmarker.network.EyeClient
 import com.google.mediapipe.tasks.vision.core.RunningMode
-import java.util.Locale
-import java.util.Optional
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.net.ServerSocket
+import java.net.Socket
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import kotlin.jvm.optionals.toList
-import kotlin.math.roundToInt
 
 class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
 
@@ -78,6 +79,9 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
 
     /** Blocking ML operations are performed using this executor */
     private lateinit var backgroundExecutor: ExecutorService
+
+    private lateinit var activateClient: ActivateClient
+    private lateinit var eyeClient: EyeClient
 
     override fun onResume() {
         super.onResume()
@@ -138,11 +142,6 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        with(fragmentCameraBinding.recyclerviewResults) {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = faceBlendshapesResultAdapter
-        }
-
         // Initialize our background executor
         backgroundExecutor = Executors.newSingleThreadExecutor()
 
@@ -165,149 +164,49 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
                 faceLandmarkerHelperListener = this
             )
         }
-
-        // Attach listeners to UI control widgets
-        initBottomSheetControls()
+        initTopSheet()
+        createServer()
     }
 
-    private fun initBottomSheetControls() {
-        // init bottom sheet settings
-        fragmentCameraBinding.bottomSheetLayout.maxFacesValue.text =
-            viewModel.currentMaxFaces.toString()
-        fragmentCameraBinding.bottomSheetLayout.detectionThresholdValue.text =
-            String.format(
-                Locale.US, "%.2f", viewModel.currentMinFaceDetectionConfidence
-            )
-        fragmentCameraBinding.bottomSheetLayout.trackingThresholdValue.text =
-            String.format(
-                Locale.US, "%.2f", viewModel.currentMinFaceTrackingConfidence
-            )
-        fragmentCameraBinding.bottomSheetLayout.presenceThresholdValue.text =
-            String.format(
-                Locale.US, "%.2f", viewModel.currentMinFacePresenceConfidence
-            )
-
-        // When clicked, lower face detection score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.detectionThresholdMinus.setOnClickListener {
-            if (faceLandmarkerHelper.minFaceDetectionConfidence >= 0.2) {
-                faceLandmarkerHelper.minFaceDetectionConfidence -= 0.1f
-                updateControlsUi()
+    private fun createServer() {
+        activateClient = ActivateClient({
+            if (it) {
+                fragmentCameraBinding.overlay.activate()
+            } else {
+                fragmentCameraBinding.overlay.deactivate()
             }
-        }
+        })
+        eyeClient = EyeClient({
+            fragmentCameraBinding.overlay.updateEye(it)
+        })
+    }
 
-        // When clicked, raise face detection score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.detectionThresholdPlus.setOnClickListener {
-            if (faceLandmarkerHelper.minFaceDetectionConfidence <= 0.8) {
-                faceLandmarkerHelper.minFaceDetectionConfidence += 0.1f
-                updateControlsUi()
-            }
-        }
 
-        // When clicked, lower face tracking score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.trackingThresholdMinus.setOnClickListener {
-            if (faceLandmarkerHelper.minFaceTrackingConfidence >= 0.2) {
-                faceLandmarkerHelper.minFaceTrackingConfidence -= 0.1f
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, raise face tracking score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.trackingThresholdPlus.setOnClickListener {
-            if (faceLandmarkerHelper.minFaceTrackingConfidence <= 0.8) {
-                faceLandmarkerHelper.minFaceTrackingConfidence += 0.1f
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, lower face presence score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.presenceThresholdMinus.setOnClickListener {
-            if (faceLandmarkerHelper.minFacePresenceConfidence >= 0.2) {
-                faceLandmarkerHelper.minFacePresenceConfidence -= 0.1f
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, raise face presence score threshold floor
-        fragmentCameraBinding.bottomSheetLayout.presenceThresholdPlus.setOnClickListener {
-            if (faceLandmarkerHelper.minFacePresenceConfidence <= 0.8) {
-                faceLandmarkerHelper.minFacePresenceConfidence += 0.1f
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, reduce the number of faces that can be detected at a
-        // time
-        fragmentCameraBinding.bottomSheetLayout.maxFacesMinus.setOnClickListener {
-            if (faceLandmarkerHelper.maxNumFaces > 1) {
-                faceLandmarkerHelper.maxNumFaces--
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, increase the number of faces that can be detected
-        // at a time
-        fragmentCameraBinding.bottomSheetLayout.maxFacesPlus.setOnClickListener {
-            if (faceLandmarkerHelper.maxNumFaces < 2) {
-                faceLandmarkerHelper.maxNumFaces++
-                updateControlsUi()
-            }
-        }
-
-        // When clicked, change the underlying hardware used for inference.
-        // Current options are CPU and GPU
-        fragmentCameraBinding.bottomSheetLayout.spinnerDelegate.setSelection(
-            viewModel.currentDelegate, false
+    private fun initTopSheet() {
+        fragmentCameraBinding.methodSpinner.setSelection(
+            MainViewModel.METHOD_HEAD, false
         )
-        fragmentCameraBinding.bottomSheetLayout.spinnerDelegate.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long
-                ) {
-                    try {
-                        faceLandmarkerHelper.currentDelegate = p2
-                        updateControlsUi()
-                    } catch(e: UninitializedPropertyAccessException) {
-                        Log.e(TAG, "FaceLandmarkerHelper has not been initialized yet.")
-                    }
+        fragmentCameraBinding.methodSpinner.onItemSelectedListener =
+            object: AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                    fragmentCameraBinding.overlay.setMethod(p2)
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
-                    /* no op */
                 }
             }
-    }
+        fragmentCameraBinding.methodSpinner.setSelection(
+            MainViewModel.DYNAMIC, false
+        )
+        fragmentCameraBinding.dynamicSpinner.onItemSelectedListener =
+            object: AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                    fragmentCameraBinding.overlay.setDynamic(p2)
+                }
 
-    // Update the values displayed in the bottom sheet. Reset Facelandmarker
-    // helper.
-    private fun updateControlsUi() {
-        fragmentCameraBinding.bottomSheetLayout.maxFacesValue.text =
-            faceLandmarkerHelper.maxNumFaces.toString()
-        fragmentCameraBinding.bottomSheetLayout.detectionThresholdValue.text =
-            String.format(
-                Locale.US,
-                "%.2f",
-                faceLandmarkerHelper.minFaceDetectionConfidence
-            )
-        fragmentCameraBinding.bottomSheetLayout.trackingThresholdValue.text =
-            String.format(
-                Locale.US,
-                "%.2f",
-                faceLandmarkerHelper.minFaceTrackingConfidence
-            )
-        fragmentCameraBinding.bottomSheetLayout.presenceThresholdValue.text =
-            String.format(
-                Locale.US,
-                "%.2f",
-                faceLandmarkerHelper.minFacePresenceConfidence
-            )
-
-        // Needs to be cleared instead of reinitialized because the GPU
-        // delegate needs to be initialized on the thread using it when applicable
-        backgroundExecutor.execute {
-            faceLandmarkerHelper.clearFaceLandmarker()
-            faceLandmarkerHelper.setupFaceLandmarker()
-        }
-        fragmentCameraBinding.overlay.clear()
+                override fun onNothingSelected(p0: AdapterView<*>?) {
+                }
+            }
     }
 
     // Initialize CameraX, and prepare to bind the camera use cases
@@ -393,30 +292,18 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
     ) {
         activity?.runOnUiThread {
             if (_fragmentCameraBinding != null) {
-                if (fragmentCameraBinding.recyclerviewResults.scrollState != SCROLL_STATE_DRAGGING) {
-                    faceBlendshapesResultAdapter.updateResults(resultBundle.result)
-                    faceBlendshapesResultAdapter.notifyDataSetChanged()
-                }
-
-
-                fragmentCameraBinding.bottomSheetLayout.inferenceTimeVal.text =
-                    String.format("%d ms", resultBundle.inferenceTime)
-
-                // Pass necessary information to OverlayView for drawing on the canvas
-                fragmentCameraBinding.overlay.setResults(
+                fragmentCameraBinding.overlay.updateHead(
                     resultBundle.result,
                     resultBundle.inputImageHeight,
                     resultBundle.inputImageWidth,
                     RunningMode.LIVE_STREAM
                 )
-                // Force a redraw
                 fragmentCameraBinding.overlay.invalidate()
             }
         }
     }
 
     override fun onEmpty() {
-        fragmentCameraBinding.overlay.clear()
         activity?.runOnUiThread {
             faceBlendshapesResultAdapter.updateResults(null)
             faceBlendshapesResultAdapter.notifyDataSetChanged()
@@ -428,12 +315,6 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
             faceBlendshapesResultAdapter.updateResults(null)
             faceBlendshapesResultAdapter.notifyDataSetChanged()
-
-            if (errorCode == FaceLandmarkerHelper.GPU_ERROR) {
-                fragmentCameraBinding.bottomSheetLayout.spinnerDelegate.setSelection(
-                    FaceLandmarkerHelper.DELEGATE_CPU, false
-                )
-            }
         }
     }
 }

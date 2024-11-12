@@ -20,38 +20,80 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:id="@+id/method_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:entries="@array/method_spinner_titles"
+            android:minWidth="@dimen/bottom_sheet_spinner_delegate_min_width"
+            android:minHeight="50dp"
+            android:spinnerMode="dropdown"
+            android:theme="@style/BottomSheetSpinnerItemStyle" />
+
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:id="@+id/dynamic_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:entries="@array/dynamic_spinner_titles"
+            android:minWidth="@dimen/bottom_sheet_spinner_delegate_min_width"
+            android:minHeight="50dp"
+            android:spinnerMode="dropdown"
+            android:theme="@style/BottomSheetSpinnerItemStyle" />
+
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:id="@+id/ignore_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/ignore_spinner_titles"
+            android:layout_weight="1"
+            android:minWidth="@dimen/bottom_sheet_spinner_delegate_min_width"
+            android:minHeight="50dp"
+            android:spinnerMode="dropdown"
+            android:theme="@style/BottomSheetSpinnerItemStyle" />
+    </LinearLayout>
+
     <androidx.camera.view.PreviewView
         android:id="@+id/view_finder"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="200dp"
         app:scaleType="fillStart" />
 
     <com.google.mediapipe.examples.facelandmarker.OverlayView
         android:id="@+id/overlay"
+        android:clickable="true"
+        android:layout_marginTop="50dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <include
-        android:id="@+id/bottom_sheet_layout"
-        layout="@layout/info_bottom_sheet" />
+<!--    <include-->
+<!--        android:id="@+id/bottom_sheet_layout"-->
+<!--        layout="@layout/info_bottom_sheet" />-->
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview_results"
-        android:layout_width="match_parent"
-        android:layout_height="75dp"
-        android:layout_gravity="top"
-        android:layout_marginBottom="@dimen/bottom_sheet_peek_height"
-        android:background="@color/bottom_sheet_background"
-        android:clipToPadding="true"
-        android:paddingHorizontal="@dimen/bottom_sheet_padding"
-        app:layout_anchor="@id/bottom_sheet_layout"
-        app:layout_anchorGravity="top"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/recyclerview_results"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="75dp"-->
+<!--        android:layout_gravity="top"-->
+<!--        android:layout_marginBottom="@dimen/bottom_sheet_peek_height"-->
+<!--        android:background="@color/bottom_sheet_background"-->
+<!--        android:clipToPadding="true"-->
+<!--        android:paddingHorizontal="@dimen/bottom_sheet_padding"-->
+<!--        app:layout_anchor="@id/bottom_sheet_layout"-->
+<!--        app:layout_anchorGravity="top"-->
+<!--        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />-->
 
-    <View
-        android:layout_width="wrap_content"
-        android:layout_height="1dp"
-        android:background="@color/mp_color_primary"
-        app:layout_anchor="@id/recyclerview_results"
-        app:layout_anchorGravity="bottom" />
+<!--    <View-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="1dp"-->
+<!--        android:background="@color/mp_color_primary"-->
+<!--        app:layout_anchor="@id/recyclerview_results"-->
+<!--        app:layout_anchorGravity="bottom" />-->
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

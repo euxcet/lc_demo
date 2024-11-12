@@ -15,7 +15,12 @@
  */
 package com.google.mediapipe.examples.facelandmarker
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.util.Log
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
@@ -28,16 +33,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
 
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
-        val navController = navHostFragment.navController
-        activityMainBinding.navigation.setupWithNavController(navController)
-        activityMainBinding.navigation.setOnNavigationItemReselectedListener {
-            // ignore the reselection
-        }
+//        val navHostFragment =
+//            supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
+//        val navController = navHostFragment.navController
+//        activityMainBinding.navigation.setupWithNavController(navController)
+//        activityMainBinding.navigation.setOnNavigationItemReselectedListener {
+//            // ignore the reselection
+//        }
     }
 
     override fun onBackPressed() {

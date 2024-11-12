@@ -25,7 +25,7 @@
     <dimen name="bottom_sheet_default_row_margin">16dp</dimen>
     <dimen name="bottom_sheet_control_btn_size">48dp</dimen>
     <dimen name="bottom_sheet_control_text_side_margin">10dp</dimen>
-    <dimen name="bottom_sheet_spinner_delegate_min_width">160dp</dimen>
+    <dimen name="bottom_sheet_spinner_delegate_min_width">400dp</dimen>
     <dimen name="bottom_sheet_spinner_model_min_width">240dp</dimen>
 
     <integer name="bottom_sheet_control_text_min_ems">3</integer>

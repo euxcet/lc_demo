@@ -45,6 +45,23 @@
     <string name="label_num_faces">Number of Faces</string>
     <string name="label_delegate">Delegate</string>
 
+    <string-array name="ignore_spinner_titles">
+        <item>DOUBLE_TAP</item>
+        <item>VOICE</item>
+        <item>TOUCH_SENSOR</item>
+    </string-array>
+
+    <string-array name="method_spinner_titles">
+        <item>TOUCH</item>
+        <item>IMU</item>
+        <item>HEAD</item>
+    </string-array>
+
+    <string-array name="dynamic_spinner_titles">
+        <item>DYNAMIC</item>
+        <item>STATIC</item>
+    </string-array>
+
     <string-array name="delegate_spinner_titles">
         <item>CPU</item>
         <item>GPU</item>

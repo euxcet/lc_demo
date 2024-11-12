@@ -22,6 +22,15 @@ import androidx.lifecycle.ViewModel
  */
 class MainViewModel : ViewModel() {
 
+    companion object {
+        const val METHOD_TOUCH = 0
+        const val METHOD_IMU = 1
+        const val METHOD_HEAD = 2
+
+        const val DYNAMIC = 0
+        const val STATIC = 1
+    }
+
     private var _delegate: Int = FaceLandmarkerHelper.DELEGATE_CPU
     private var _minFaceDetectionConfidence: Float =
         FaceLandmarkerHelper.DEFAULT_FACE_DETECTION_CONFIDENCE
@@ -30,6 +39,8 @@ class MainViewModel : ViewModel() {
     private var _minFacePresenceConfidence: Float = FaceLandmarkerHelper
         .DEFAULT_FACE_PRESENCE_CONFIDENCE
     private var _maxFaces: Int = FaceLandmarkerHelper.DEFAULT_NUM_FACES
+
+    private var _method: Int = METHOD_HEAD
 
     val currentDelegate: Int get() = _delegate
     val currentMinFaceDetectionConfidence: Float
