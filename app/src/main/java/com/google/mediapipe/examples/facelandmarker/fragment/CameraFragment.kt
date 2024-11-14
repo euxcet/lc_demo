@@ -195,7 +195,7 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
                 override fun onNothingSelected(p0: AdapterView<*>?) {
                 }
             }
-        fragmentCameraBinding.methodSpinner.setSelection(
+        fragmentCameraBinding.dynamicSpinner.setSelection(
             MainViewModel.DYNAMIC, false
         )
         fragmentCameraBinding.dynamicSpinner.onItemSelectedListener =

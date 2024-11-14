@@ -27,6 +27,7 @@ class Experiment(
     private val logFile: File = File(context?.externalCacheDir, "log.txt")
     private var writer: BufferedWriter
     var method: Int = 0
+    var dynamic: Boolean = false
 
     init {
         Log.e("Test", "Log ${logFile}")
@@ -58,7 +59,7 @@ class Experiment(
                    distance(cursorY, target.top, target.bottom))
     }
 
-    fun inside(
+    private fun inside(
         cursorX: Float,
         cursorY: Float,
         target: Rect,
@@ -69,7 +70,7 @@ class Experiment(
                 cursorY <= target.bottom
     }
 
-    fun update(
+    fun inside(
         cursorX: Float,
         cursorY: Float
     ): Boolean {
@@ -98,12 +99,23 @@ class Experiment(
                 (y + rHeight / 2).toInt()
             )
             if (distance(cursorX, cursorY, rect) > minDisFromCursor) {
-                writer.write("start $method ${System.currentTimeMillis()} $cursorX $cursorY $minDisFromCursor $width $height ${rect.top} ${rect.bottom} ${rect.left} ${rect.right}\n")
+//                writer.write("start $method ${System.currentTimeMillis()} $cursorX $cursorY $minDisFromCursor $width $height ${rect.top} ${rect.bottom} ${rect.left} ${rect.right}\n")
+                writer.write("start $method $dynamic ${System.currentTimeMillis()}\n")
                 writer.flush()
                 target = rect
                 return rect
             }
         }
+    }
+
+    fun activate() {
+        writer.write("activate ${System.currentTimeMillis()}\n")
+        writer.flush()
+    }
+
+    fun deactivate() {
+        writer.write("deactivate ${System.currentTimeMillis()}\n")
+        writer.flush()
     }
 
     fun finishRound() {

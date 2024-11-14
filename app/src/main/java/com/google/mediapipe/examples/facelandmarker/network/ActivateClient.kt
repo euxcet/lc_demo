@@ -32,9 +32,9 @@ class ActivateClient(
                     val message = input.readLine()
                     if (message != null) {
                         for (s in message) {
-                            if (s == '1') {
+                            if (s == '0') {
                                 callback(true)
-                            } else if (s == '0') {
+                            } else if (s == '1') {
                                 callback(false)
                             }
                         }

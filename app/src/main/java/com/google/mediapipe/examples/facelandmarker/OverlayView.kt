@@ -44,8 +44,9 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         const val V_MIN = 0f
         const val V_INF = SCALE_RATIO * (V_MAX - V_MIN) + V_MIN
 
-        const val THRESHOLD_TOUCH = 300f
-        const val THRESHOLD_IMU = 300f
+        const val THRESHOLD_TOUCH = 100f
+        const val THRESHOLD_IMU = 100f
+        const val THRESHOLD_HEAD = 100f
     }
 
     private val cursorPaint = Paint()
@@ -71,8 +72,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var imuSumY = 0f
     private var touchSumX = 0f
     private var touchSumY = 0f
+    private var headStartX = -1f
+    private var headStartY = -1f
 
     init {
+        newRound()
         initPaints()
         val sensorManager = context?.getSystemService(SENSOR_SERVICE) as SensorManager
         sensorManager.registerListener(
@@ -112,11 +116,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     fun newRound() {
-        imuSumX = 0f
-        imuSumY = 0f
-        touchSumX = 0f
-        touchSumY = 0f
-        experiment.finishRound()
         invalidate()
         CoroutineScope(Dispatchers.Default).launch {
             delay(200)
@@ -137,13 +136,27 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     fun activate() {
+        imuSumX = 0f
+        imuSumY = 0f
+        touchSumX = 0f
+        touchSumY = 0f
+        headStartX = -1f
+        headStartY = -1f
+        lastYaw = 0f
+        lastPitch = 0f
+        lastRoll = 0f
+        experiment.activate()
         activated = true
-        newRound()
         invalidate()
     }
 
     fun deactivate() {
+        experiment.deactivate()
         activated = false
+        if (experiment.inside(cursorX, cursorY)) {
+            experiment.finishRound()
+            newRound()
+        }
         invalidate()
     }
 
@@ -155,10 +168,14 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     fun setDynamic(newDynamic: Int) {
         dynamic = newDynamic == 0
+        experiment.dynamic = dynamic
+        if (!activated) {
+            allowEye = dynamic
+        }
     }
 
     fun updateEye(position: Pair<Float, Float>) {
-        if (allowEye) {
+        if (allowEye || !activated) {
             moveTo(position.first, position.second)
         }
     }
@@ -169,15 +186,25 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         imageWidth: Int,
         runningMode: RunningMode = RunningMode.IMAGE
     ) {
-        if (method == 2) {
-            allowEye = false
-            val position = FaceOrientation.getOrientation(results.faceLandmarks()[0], imageHeight, imageWidth)
-            moveTo(
-                (0.0 + 1000.0 * position.second).toFloat(),
-                (0.0 + 2000.0 * position.first).toFloat()
-            )
-            invalidate()
+        if (method != 2 || !activated) {
+            return
         }
+        val position = FaceOrientation.getOrientation(results.faceLandmarks()[0], imageHeight, imageWidth)
+
+        val x = (0.0 + 1000.0 * position.second).toFloat()
+        val y = (0.0 + 2000.0 * position.first).toFloat()
+        if (headStartX == -1f || headStartY == -1f) {
+            headStartX = x
+            headStartY = y
+        } else if (allowEye) {
+            if (abs(x - headStartX) > THRESHOLD_HEAD || abs(y - headStartY) > THRESHOLD_HEAD) {
+                allowEye = false
+                moveTo(x, y)
+            }
+        } else {
+            moveTo(x, y)
+        }
+        invalidate()
     }
 
     private fun cdRatio(v: Float): Float {
@@ -187,9 +214,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private fun moveTo(x: Float, y: Float) {
         cursorX = min(max(x, 0f), CURSOR_MAX_X)
         cursorY = min(max(y, 0f), CURSOR_MAX_Y)
-        if (experiment.update(cursorX, cursorY)) {
-            newRound()
-        }
         invalidate()
     }
 
@@ -198,7 +222,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event == null || method != 0) {
+        if (event == null || method != 0 || !activated) {
             return super.onTouchEvent(event)
         }
         val x = event.rawX
@@ -216,8 +240,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 if (allowEye) {
                     if (abs(touchSumX) > THRESHOLD_TOUCH || abs(touchSumY) > THRESHOLD_TOUCH) {
                         allowEye = false
-                        touchLastX = x
-                        touchLastY = y
+                        move(touchSumX, touchSumY)
                     }
                 }
                 else {
@@ -234,7 +257,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun onSensorChanged(event: SensorEvent) {
-        if (method != 1) {
+        if (method != 1 || !activated) {
             return
         }
         if (event.sensor.type == Sensor.TYPE_ROTATION_VECTOR) {
@@ -245,14 +268,14 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             val yaw = orientation[0]
             val roll = orientation[1]
             val pitch = orientation[2]
+            if (lastYaw == 0f && lastRoll == 0f && lastPitch == 0f) {
+                lastYaw = yaw
+                lastRoll = roll
+                lastPitch = pitch
+            }
             val deltaYaw = lastYaw - yaw
             val deltaRoll = lastRoll - roll
             val deltaPitch = lastPitch - pitch
-
-            lastYaw = yaw
-            lastRoll = roll
-            lastPitch = pitch
-
             val velocityX = deltaPitch * 1000f;
             val velocityY = deltaRoll * -2000f;
             imuSumX += velocityX
@@ -265,6 +288,9 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             } else {
                 move(velocityX, velocityY)
             }
+            lastYaw = yaw
+            lastRoll = roll
+            lastPitch = pitch
         }
     }
 
