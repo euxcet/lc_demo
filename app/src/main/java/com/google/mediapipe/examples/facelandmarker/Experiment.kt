@@ -111,8 +111,8 @@ class Experiment(
                 (y + rHeight / 2).toInt()
             )
             if (distance(cursorX, cursorY, rect) > minDisFromCursor) {
-//                writer.write("start $method ${System.currentTimeMillis()} $cursorX $cursorY $minDisFromCursor $width $height ${rect.top} ${rect.bottom} ${rect.left} ${rect.right}\n")
-                writer.write("start $method $dynamic ${System.currentTimeMillis()}\n")
+                writer.write("start $method $dynamic ${System.currentTimeMillis()} ${rect.top} ${rect.bottom} ${rect.left} ${rect.right}\n")
+//                writer.write("start $method $dynamic ${System.currentTimeMillis()}\n")
                 writer.flush()
                 target = rect
                 return rect

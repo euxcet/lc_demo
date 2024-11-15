@@ -107,11 +107,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
-        if (activated) {
-            canvas.drawCircle(cursorX, cursorY, 20.0f, cursorPaint)
-        }
         if (experiment.target != null) {
             canvas.drawRect(experiment.target!!, targetPaint)
+        }
+        if (activated) {
+            canvas.drawCircle(cursorX, cursorY, 20.0f, cursorPaint)
         }
     }
 
@@ -136,6 +136,9 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     fun activate() {
+        if (activated) {
+            return
+        }
         imuSumX = 0f
         imuSumY = 0f
         touchSumX = 0f
@@ -151,6 +154,9 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     fun deactivate() {
+        if (!activated) {
+            return
+        }
         experiment.deactivate()
         activated = false
         if (experiment.inside(cursorX, cursorY)) {
@@ -250,7 +256,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 touchLastY = y
             }
             MotionEvent.ACTION_UP -> {
-
+                deactivate()
             }
         }
         return super.onTouchEvent(event)
