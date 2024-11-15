@@ -14,6 +14,9 @@ class ActivateClient(
     val callback: (Boolean) -> Unit,
     val port: Int = 12345,
 ) {
+    private var inited = false
+    private var last = false
+
     init {
         CoroutineScope(Dispatchers.IO).launch {
             val serverSocket = ServerSocket(port)
@@ -24,6 +27,19 @@ class ActivateClient(
         }
     }
 
+    private fun filterCallback(x: Boolean) {
+        if (!inited) {
+            inited = true
+            callback(x)
+        }
+        else {
+            if (last != x) {
+                callback(x)
+            }
+        }
+        last = x
+    }
+
     private fun handleClient(clientSocket: Socket) {
         CoroutineScope(Dispatchers.IO).launch {
             val input = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
@@ -32,11 +48,10 @@ class ActivateClient(
                     val message = input.readLine()
                     if (message != null) {
                         for (s in message) {
-                            Log.e("Test", "Received: $s")
                             if (s == '0') {
-                                callback(true)
+                                filterCallback(true)
                             } else if (s == '1') {
-                                callback(false)
+                                filterCallback(false)
                             }
                         }
                     } else {
