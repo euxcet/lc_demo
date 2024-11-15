@@ -2,10 +2,16 @@ package com.google.mediapipe.examples.facelandmarker
 
 import android.content.Context
 import android.graphics.Rect
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
 import kotlin.math.min
 import kotlin.math.sqrt
 import kotlin.random.Random
@@ -13,6 +19,7 @@ import kotlin.random.Random
 class Rectangle(
 )
 
+@RequiresApi(Build.VERSION_CODES.O)
 class Experiment(
     val context: Context?,
     val maxX: Float,
@@ -24,12 +31,17 @@ class Experiment(
     }
 
     var target: Rect? = null
-    private val logFile: File = File(context?.externalCacheDir, "log.txt")
+    private val logFile: File?
     private var writer: BufferedWriter
     var method: Int = 0
     var dynamic: Boolean = false
 
     init {
+        val currentDateTime = LocalDateTime.now()
+        val formattedTime = currentDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH_mm_ss"))
+        val logFileName = "log [$formattedTime].txt"
+        logFile = File(context?.filesDir, logFileName)
+
         Log.e("Test", "Log ${logFile}")
         if (!logFile.exists()) {
             logFile.createNewFile()

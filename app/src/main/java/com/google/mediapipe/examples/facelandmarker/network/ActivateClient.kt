@@ -32,6 +32,7 @@ class ActivateClient(
                     val message = input.readLine()
                     if (message != null) {
                         for (s in message) {
+                            Log.e("Test", "Received: $s")
                             if (s == '0') {
                                 callback(true)
                             } else if (s == '1') {
