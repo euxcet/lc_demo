@@ -119,7 +119,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         invalidate()
         CoroutineScope(Dispatchers.Default).launch {
             delay(200)
-            allowEye = dynamic
             experiment.newRound(
                 cursorX = cursorX,
                 cursorY = cursorY,
@@ -129,16 +128,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    fun reset() {
-        cursorX = CURSOR_ORIGIN_X
-        cursorY = CURSOR_ORIGIN_Y
-        invalidate()
-    }
-
     fun activate() {
         if (activated) {
             return
         }
+        allowEye = dynamic
         imuSumX = 0f
         imuSumY = 0f
         touchSumX = 0f
