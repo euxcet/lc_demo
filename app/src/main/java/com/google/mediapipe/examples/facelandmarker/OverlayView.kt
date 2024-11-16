@@ -31,8 +31,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         const val CURSOR_ORIGIN_X = 600.0f
         const val CURSOR_ORIGIN_Y = 600.0f
 
-        const val CURSOR_MAX_X = 1000.0f
-        const val CURSOR_MAX_Y = 2000.0f
 
         const val SCALE_RATIO = 1.0f
         const val SCALE_RATIO_X = 1.0f
@@ -49,6 +47,9 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         const val THRESHOLD_HEAD = 100f
     }
 
+    var CURSOR_MAX_X = 0f
+    var CURSOR_MAX_Y = 0f
+
     private val cursorPaint = Paint()
     private val targetPaint = Paint()
     private var cursorX = CURSOR_ORIGIN_X
@@ -62,7 +63,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var activated = false
     private var allowEye = true
 
-    private val experiment = Experiment(context, CURSOR_MAX_X, CURSOR_MAX_Y)
+    private lateinit var experiment: Experiment
 
     private var lastYaw = 0f
     private var lastRoll = 0f
@@ -76,14 +77,21 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var headStartY = -1f
 
     init {
-        newRound()
-        initPaints()
-        val sensorManager = context?.getSystemService(SENSOR_SERVICE) as SensorManager
-        sensorManager.registerListener(
-            this,
-            sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
-            SensorManager.SENSOR_DELAY_FASTEST
-        )
+        viewTreeObserver.addOnGlobalLayoutListener {
+            if (CURSOR_MAX_X == 0f) {
+                CURSOR_MAX_X = width * 1.0f
+                CURSOR_MAX_Y = height * 1.0f
+                experiment = Experiment(context, CURSOR_MAX_X, CURSOR_MAX_Y)
+                newRound()
+                initPaints()
+                val sensorManager = context?.getSystemService(SENSOR_SERVICE) as SensorManager
+                sensorManager.registerListener(
+                    this,
+                    sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
+                    SensorManager.SENSOR_DELAY_FASTEST
+                )
+            }
+        }
     }
 
     fun clear() {
