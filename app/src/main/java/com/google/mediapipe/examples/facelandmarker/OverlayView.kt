@@ -60,19 +60,25 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var touchLastX = 0.0f
     private var touchLastY = 0.0f
 
-    private var activated = false
-    private var allowEye = true
-
-    private lateinit var experiment: Experiment
+    private var headLastX = 0.0f
+    private var headLastY = 0.0f
 
     private var lastYaw = 0f
     private var lastRoll = 0f
     private var lastPitch = 0f
 
+    private var activated = false
+    private var allowEye = true
+
+    private lateinit var experiment: Experiment
+
+
     private var imuSumX = 0f
     private var imuSumY = 0f
     private var touchSumX = 0f
     private var touchSumY = 0f
+    private var headSumX = 0f
+    private var headSumY = 0f
     private var headStartX = -1f
     private var headStartY = -1f
 
@@ -157,6 +163,10 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         lastYaw = 0f
         lastPitch = 0f
         lastRoll = 0f
+        headLastX = 0f
+        headLastY = 0f
+        headSumX = 0f
+        headSumY = 0f
         experiment.activate()
         activated = true
         invalidate()
@@ -208,6 +218,27 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
         val x = (0.0 + 1000.0 * position.second).toFloat()
         val y = (0.0 + 2000.0 * position.first).toFloat()
+
+        if (headLastX == 0f && headLastY == 0f) {
+            headLastX = x
+            headLastY = y
+        }
+        val deltaX = x - headLastX
+        val deltaY = y - headLastY
+        headSumX += deltaX
+        headSumY += deltaY
+        if (allowEye) {
+            if (abs(headSumX) > THRESHOLD_HEAD || abs(headSumY) > THRESHOLD_HEAD) {
+                allowEye = false
+                move(headSumX, headSumY)
+            }
+        } else {
+            move(deltaX, deltaY)
+        }
+        headLastX = x
+        headLastY = y
+
+        /*
         if (headStartX == -1f || headStartY == -1f) {
             headStartX = x
             headStartY = y
@@ -219,6 +250,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         } else {
             moveTo(x, y)
         }
+         */
         invalidate()
     }
 
