@@ -27,7 +27,7 @@ class Experiment(
 ) {
     companion object {
         const val MIN_SIZE = 50.0f
-        const val MAX_SIZE = 400.0f
+        const val MAX_SIZE = 1100.0f
     }
 
     var target: Rect? = null

@@ -31,7 +31,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         const val CURSOR_ORIGIN_X = 600.0f
         const val CURSOR_ORIGIN_Y = 600.0f
 
-
         const val SCALE_RATIO = 1.0f
         const val SCALE_RATIO_X = 1.0f
         const val SCALE_RATIO_Y = 1.0f
@@ -51,6 +50,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     var CURSOR_MAX_Y = 0f
 
     private val cursorPaint = Paint()
+    private val cursorOutlinePaint = Paint()
     private val targetPaint = Paint()
     private var cursorX = CURSOR_ORIGIN_X
     private var cursorY = CURSOR_ORIGIN_Y
@@ -102,13 +102,19 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private fun initPaints() {
         cursorX = CURSOR_ORIGIN_X
         cursorY = CURSOR_ORIGIN_Y
+
         cursorPaint.isAntiAlias = true
-        cursorPaint.color = Color.GREEN
+        cursorPaint.color = Color.argb(128, 255, 0, 0)
         cursorPaint.style = Paint.Style.FILL
         cursorPaint.strokeWidth = 10f
 
+        cursorOutlinePaint.isAntiAlias = true
+        cursorOutlinePaint.color = Color.argb(255, 0, 0, 0)
+        cursorOutlinePaint.style = Paint.Style.STROKE
+        cursorOutlinePaint.strokeWidth = 5f
+
         targetPaint.isAntiAlias = true
-        targetPaint.color = Color.RED
+        targetPaint.color = Color.argb(128, 235, 125, 125)
         targetPaint.style = Paint.Style.FILL
         targetPaint.strokeWidth = 10f
     }
@@ -119,7 +125,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             canvas.drawRect(experiment.target!!, targetPaint)
         }
         if (activated) {
-            canvas.drawCircle(cursorX, cursorY, 20.0f, cursorPaint)
+            canvas.drawCircle(cursorX, cursorY, 30.0f, cursorPaint)
+            canvas.drawCircle(cursorX, cursorY, 30.0f, cursorOutlinePaint)
         }
     }
 
