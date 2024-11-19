@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.google.mediapipe.examples.facelandmarker.fragment.CameraFragment
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -12,6 +13,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.min
 import kotlin.math.sqrt
 import kotlin.random.Random
@@ -26,11 +28,12 @@ class Experiment(
     val maxY: Float,
 ) {
     companion object {
-        const val MIN_SIZE = 50.0f
-        const val MAX_SIZE = 1100.0f
+        const val MIN_SIZE = 200.0f
+        const val MAX_SIZE = 200.0f
     }
 
     var target: Rect? = null
+    var attraction: ArrayList<Rect> = ArrayList()
     private val logFile: File?
     private var writer: BufferedWriter
     var method: Int = 0
@@ -110,6 +113,24 @@ class Experiment(
                 (x + rWidth / 2).toInt(),
                 (y + rHeight / 2).toInt()
             )
+
+            attraction.clear()
+            val attractionNum = Random.nextInt(1, 5)
+            for (i in 0..attractionNum)
+            {
+                val attractionWidth = width ?: (Random.nextFloat() * (MAX_SIZE * 2 - MIN_SIZE) + MIN_SIZE)
+                val attractionHeight = height ?: (Random.nextFloat() * (MAX_SIZE * 2 - MIN_SIZE) + MIN_SIZE)
+                val attractionX = Random.nextInt((attractionWidth / 2).toInt(), (maxX - attractionWidth / 2).toInt())
+                val attractionY = Random.nextInt((attractionHeight / 2).toInt(), (maxY - attractionHeight / 2).toInt())
+                val attractionRect = Rect(
+                    (attractionX - attractionWidth / 2).toInt(),
+                    (attractionY - attractionHeight / 2).toInt(),
+                    (attractionX + attractionWidth / 2).toInt(),
+                    (attractionY + attractionHeight / 2).toInt()
+                )
+                attraction.add(attractionRect)
+            }
+
             if (distance(cursorX, cursorY, rect) > minDisFromCursor) {
                 writer.write("start $method $dynamic ${System.currentTimeMillis()} ${rect.top} ${rect.bottom} ${rect.left} ${rect.right}\n")
 //                writer.write("start $method $dynamic ${System.currentTimeMillis()}\n")
@@ -121,12 +142,21 @@ class Experiment(
     }
 
     fun activate() {
-        writer.write("activate ${System.currentTimeMillis()}\n")
+
+        val method = (context as? MainActivity)?.getCameraFragment()?.fragmentCameraBinding?.methodSpinner?.selectedItem
+        val dynamic = (context as? MainActivity)?.getCameraFragment()?.fragmentCameraBinding?.dynamicSpinner?.selectedItem
+        val activation = (context as? MainActivity)?.getCameraFragment()?.fragmentCameraBinding?.ignoreSpinner?.selectedItem
+
+        writer.write("activate ${System.currentTimeMillis()} ${method} ${dynamic} ${activation}\n")
         writer.flush()
     }
 
     fun deactivate() {
-        writer.write("deactivate ${System.currentTimeMillis()}\n")
+        val method = (context as? MainActivity)?.getCameraFragment()?.fragmentCameraBinding?.methodSpinner?.selectedItem
+        val dynamic = (context as? MainActivity)?.getCameraFragment()?.fragmentCameraBinding?.dynamicSpinner?.selectedItem
+        val activation = (context as? MainActivity)?.getCameraFragment()?.fragmentCameraBinding?.ignoreSpinner?.selectedItem
+
+        writer.write("deactivate ${System.currentTimeMillis()} ${method} ${dynamic} ${activation}\n")
         writer.flush()
     }
 

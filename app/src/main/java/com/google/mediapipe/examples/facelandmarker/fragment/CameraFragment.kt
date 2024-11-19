@@ -62,7 +62,7 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
 
-    private val fragmentCameraBinding
+    val fragmentCameraBinding
         get() = _fragmentCameraBinding!!
 
     private lateinit var faceLandmarkerHelper: FaceLandmarkerHelper
@@ -132,9 +132,7 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _fragmentCameraBinding =
-            FragmentCameraBinding.inflate(inflater, container, false)
-
+        _fragmentCameraBinding = FragmentCameraBinding.inflate(inflater, container, false)
         return fragmentCameraBinding.root
     }
 
@@ -184,7 +182,7 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
 
     private fun initTopSheet() {
         fragmentCameraBinding.methodSpinner.setSelection(
-            MainViewModel.METHOD_HEAD, false
+            MainViewModel.METHOD_TOUCH, false
         )
         fragmentCameraBinding.methodSpinner.onItemSelectedListener =
             object: AdapterView.OnItemSelectedListener {

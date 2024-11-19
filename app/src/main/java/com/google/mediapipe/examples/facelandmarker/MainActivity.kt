@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.mediapipe.examples.facelandmarker.databinding.ActivityMainBinding
+import com.google.mediapipe.examples.facelandmarker.fragment.CameraFragment
 
 class MainActivity : AppCompatActivity() {
     private lateinit var activityMainBinding: ActivityMainBinding
@@ -49,5 +50,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         finish()
+    }
+
+    fun getCameraFragment(): CameraFragment? {
+        val cameraFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)?.childFragmentManager?.fragments?.getOrNull(0) as? CameraFragment
+        return cameraFragment
     }
 }

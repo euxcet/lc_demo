@@ -5,13 +5,11 @@ import android.content.Context.SENSOR_SERVICE
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import com.google.mediapipe.tasks.vision.core.RunningMode
@@ -52,6 +50,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private val cursorPaint = Paint()
     private val cursorOutlinePaint = Paint()
     private val targetPaint = Paint()
+    private val attractionPaint = Paint()
+    private val targetStrokePaint = Paint()
     private var cursorX = CURSOR_ORIGIN_X
     private var cursorY = CURSOR_ORIGIN_Y
     private var method = 0
@@ -123,13 +123,32 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         targetPaint.color = Color.argb(128, 235, 125, 125)
         targetPaint.style = Paint.Style.FILL
         targetPaint.strokeWidth = 10f
+
+        attractionPaint.isAntiAlias = true
+        attractionPaint.color = Color.argb(128, 235, 125, 125)
+        attractionPaint.style = Paint.Style.FILL
+        attractionPaint.strokeWidth = 10f
+
+        targetStrokePaint.isAntiAlias = true
+        targetStrokePaint.color = Color.argb(128, 55, 55, 55)
+        targetStrokePaint.style = Paint.Style.STROKE
+        targetStrokePaint.strokeWidth = 10f
     }
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
         if (experiment.target != null) {
             canvas.drawRect(experiment.target!!, targetPaint)
+            canvas.drawRect(experiment.target!!, targetStrokePaint)
         }
+        if (!experiment.attraction.isEmpty())
+        {
+            for (attraction in experiment.attraction)
+            {
+                canvas.drawRect(attraction, attractionPaint)
+            }
+        }
+
         if (activated) {
             canvas.drawCircle(cursorX, cursorY, 30.0f, cursorPaint)
             canvas.drawCircle(cursorX, cursorY, 30.0f, cursorOutlinePaint)
