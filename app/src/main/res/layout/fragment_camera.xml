@@ -59,6 +59,13 @@
             android:theme="@style/BottomSheetSpinnerItemStyle" />
     </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:id="@+id/text_view_round_number"
+        />
+
     <androidx.camera.view.PreviewView
         android:id="@+id/view_finder"
         android:layout_width="1dp"

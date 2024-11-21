@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.os.Build
 import android.util.Log
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.google.mediapipe.examples.facelandmarker.fragment.CameraFragment
 import java.io.BufferedWriter
@@ -38,6 +39,8 @@ class Experiment(
     private var writer: BufferedWriter
     var method: Int = 0
     var dynamic: Boolean = false
+    private var roundNum: Int = 0
+    private lateinit var textVewRoundNumber: TextView
 
     init {
         val currentDateTime = LocalDateTime.now()
@@ -50,6 +53,8 @@ class Experiment(
             logFile.createNewFile()
         }
         writer = BufferedWriter(FileWriter(logFile, false))
+
+        textVewRoundNumber = (context as? MainActivity)?.getCameraFragment()?.fragmentCameraBinding?.textViewRoundNumber!!
     }
 
     fun distance(
@@ -114,8 +119,13 @@ class Experiment(
                 (y + rHeight / 2).toInt()
             )
 
+            (context as? MainActivity)?.runOnUiThread {
+                textVewRoundNumber.text = "Round: $roundNum"
+            }
+
             attraction.clear()
-            val attractionNum = Random.nextInt(1, 5)
+//            val attractionNum = Random.nextInt(1, 5)
+            val attractionNum = -1 // 暂时去掉增加额外的attraction这个功能。。
             for (i in 0..attractionNum)
             {
                 val attractionWidth = width ?: (Random.nextFloat() * (MAX_SIZE * 2 - MIN_SIZE) + MIN_SIZE)
@@ -132,7 +142,10 @@ class Experiment(
             }
 
             if (distance(cursorX, cursorY, rect) > minDisFromCursor) {
-                writer.write("start $method $dynamic ${System.currentTimeMillis()} ${rect.top} ${rect.bottom} ${rect.left} ${rect.right}\n")
+                roundNum += 1
+
+//                writer.write("start $method $dynamic ${System.currentTimeMillis()} ${rect.top} ${rect.bottom} ${rect.left} ${rect.right}\n")
+                writer.write("start $roundNum ${System.currentTimeMillis()} ${rect.top} ${rect.bottom} ${rect.left} ${rect.right}\n")
 //                writer.write("start $method $dynamic ${System.currentTimeMillis()}\n")
                 writer.flush()
                 target = rect
