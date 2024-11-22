@@ -46,9 +46,9 @@
     <string name="label_delegate">Delegate</string>
 
     <string-array name="ignore_spinner_titles">
-        <item>DOUBLE_TAP</item>
-        <item>VOICE</item>
-        <item>TOUCH_SENSOR</item>
+        <item>TAP</item>
+        <item>BLINK</item>
+        <item>SENSOR</item>
     </string-array>
 
     <string-array name="method_spinner_titles">

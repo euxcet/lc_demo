@@ -194,7 +194,8 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
                 }
             }
         fragmentCameraBinding.dynamicSpinner.setSelection(
-            MainViewModel.DYNAMIC, false
+//            MainViewModel.DYNAMIC, false
+            MainViewModel.STATIC, false // FIXME 可能需要改回去
         )
         fragmentCameraBinding.dynamicSpinner.onItemSelectedListener =
             object: AdapterView.OnItemSelectedListener {

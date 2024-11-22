@@ -55,7 +55,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var cursorX = CURSOR_ORIGIN_X
     private var cursorY = CURSOR_ORIGIN_Y
     private var method = 0
-    private var dynamic = true
+//    private var dynamic = true
+    private var dynamic = false // FIXME 可能需要改回去
 
     private var touchLastX = 0.0f
     private var touchLastY = 0.0f
